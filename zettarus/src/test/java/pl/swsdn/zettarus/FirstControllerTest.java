@@ -15,6 +15,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
+import pl.swsdn.zettarus.web.FirstController;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = Application.class)
@@ -36,8 +37,7 @@ public class FirstControllerTest {
 
 	@Test
 	public void should_retrieve_index_page() throws Exception {
-		mockMvc.perform(get("/"))
-			.andDo(print())
-			.andExpect(status().is2xxSuccessful());
+		mockMvc.perform(get("/")).andDo(print())
+				.andExpect(status().is2xxSuccessful());
 	}
 }
