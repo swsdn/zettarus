@@ -63,7 +63,7 @@ public class Photos {
 	}
 
 	private boolean isPopulateRequired() {
-		return System.currentTimeMillis() - populationMark > 10000;
+		return System.currentTimeMillis() - populationMark > 60000;
 	}
 
 	private void isFolderValid(File rootFolder) {
