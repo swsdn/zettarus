@@ -1,0 +1,2 @@
+* podzial na dni
+* sprawdzanie czy plik istnieje (czy da się wyświetlić)
