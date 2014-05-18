@@ -13,19 +13,41 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableSortedSet.Builder;
 
 @Repository
 public class Photos {
 
-	File rootFolder;
-	ImmutableList<String> files;
+	private final File rootFolder;
+	private ImmutableSortedSet<PhotoEntry> files;
 	private long populationMark;
+
+	public class PhotoEntry implements Comparable<PhotoEntry> {
+		public final String path;
+		public final DateTime modificationTime;
+
+		PhotoEntry(Path path) {
+			this.path = getFileRelativePath(path);
+			this.modificationTime = new DateTime(path.toFile().lastModified());
+		}
+
+		private String getFileRelativePath(Path file) {
+			URI relative = rootFolder.toURI().relativize(file.toUri());
+			return relative.getPath();
+		}
+
+		@Override
+		public int compareTo(PhotoEntry o) {
+			// reversed
+			return o.modificationTime.compareTo(modificationTime);
+		}
+	}
 
 	@Autowired
 	public Photos(@Value("#{'${rootFolder.path}'}") final File rootFolder) throws IOException {
@@ -38,20 +60,16 @@ public class Photos {
 		if (!isPopulateRequired()) {
 			return;
 		}
-		final Builder<String> filesBuilder = ImmutableList.<String> builder();
+		final Builder<PhotoEntry> filesBuilder = ImmutableSortedSet.<PhotoEntry> naturalOrder();
 		SimpleFileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
 					throws IOException {
-				filesBuilder.add(getFileRelativePath(file));
+				filesBuilder.add(new PhotoEntry(file));
 				return super.visitFile(file, attrs);
 			}
 
-			private String getFileRelativePath(Path file) {
-				URI relative = rootFolder.toURI().relativize(file.toUri());
-				return relative.getPath();
-			}
 		};
 		try {
 			Files.walkFileTree(Paths.get(rootFolder.toURI()), visitor);
@@ -75,9 +93,13 @@ public class Photos {
 		return rootFolder;
 	}
 
-	public List<String> getPhotos() {
+	public List<PhotoEntry> getPhotos() {
 		populateCache();
-		return files;
+		return files.asList();
+	}
+
+	public int getCount() {
+		return files.size();
 	}
 
 }

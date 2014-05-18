@@ -65,7 +65,7 @@
 								<ul>
 									<li th:each="photo,iterStat : ${photos}">
 									<a href="#">
-										<img src="images/thumbs/1.jpg" th:attr="src=@{'/media/'+${photo}},data-large=@{'/media/'+${photo}},title=${photo},alt=${photo}" />
+										<img src="images/thumbs/1.jpg" th:attr="src=@{'/media/'+${photo.path}},data-large=@{'/media/'+${photo.path}},title=${photo.path},alt=${photo.path}" />
 									</a>
 								</li>
 <!-- 										<img src="images/thumbs/1.jpg" data-large="images/1.jpg" alt="image01" data-description="From off a hill whose concave womb reworded" /> -->
