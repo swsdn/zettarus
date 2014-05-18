@@ -4,16 +4,16 @@
     <title>Hello Spring Boot!</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="../css/bootstrap.min.css" th:href="@{../css/bootstrap.min.css}" />
 	
 	<!-- Optional theme -->
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="../css/bootstrap-theme.min.css" th:href="@{../css/bootstrap-theme.min.css}" />
 	
 	<!-- Latest compiled and minified JavaScript -->
-	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js" />
 </head>
 <body>
 <p>Hello Spring Boot!</p>
 <p th:text="${uuid}">UUID</p>
+<script src="../js/bootstrap.min.js" th:src="@{../js/bootstrap.min.js}"/>
 </body>
 </html>
