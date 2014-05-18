@@ -4,6 +4,7 @@ import static org.springframework.util.Assert.isTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,54 +15,55 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
-@Component
-public class RootFolder {
+@Repository
+public class Photos {
 
 	File rootFolder;
 	ImmutableList<String> files;
-	ImmutableList<String> directories;
+	private long populationMark;
 
 	@Autowired
-	public RootFolder(@Value("#{'${rootFolder.path}'}") final File rootFolder) throws IOException {
+	public Photos(@Value("#{'${rootFolder.path}'}") final File rootFolder) throws IOException {
 		isFolderValid(rootFolder);
 		this.rootFolder = rootFolder;
-		//populateCache();
+		populateCache();
 	}
 
 	private void populateCache() {
+		if (!isPopulateRequired()) {
+			return;
+		}
 		final Builder<String> filesBuilder = ImmutableList.<String> builder();
-		final Builder<String> directoriesBuilder = ImmutableList.<String> builder();
-
-		final String rootFolderPathName = rootFolder.getAbsolutePath();
 		SimpleFileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
 
 			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				if (!dir.toFile().equals(rootFolder)) {
-					directoriesBuilder.add(dir.toString().replace(rootFolderPathName, ""));
-					return FileVisitResult.SKIP_SUBTREE;
-				}
-				return FileVisitResult.CONTINUE;
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+					throws IOException {
+				filesBuilder.add(getFileRelativePath(file));
+				return super.visitFile(file, attrs);
 			}
 
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				filesBuilder.add(file.toUri().toString());
-				return super.visitFile(file, attrs);
+			private String getFileRelativePath(Path file) {
+				URI relative = rootFolder.toURI().relativize(file.toUri());
+				return relative.getPath();
 			}
 		};
 		try {
 			Files.walkFileTree(Paths.get(rootFolder.toURI()), visitor);
-			this.directories = directoriesBuilder.build();
 			this.files = filesBuilder.build();
+			populationMark = System.currentTimeMillis();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private boolean isPopulateRequired() {
+		return System.currentTimeMillis() - populationMark > 10000;
 	}
 
 	private void isFolderValid(File rootFolder) {
@@ -73,14 +75,9 @@ public class RootFolder {
 		return rootFolder;
 	}
 
-	public List<String> getFiles() {
-		//populateCache();
+	public List<String> getPhotos() {
+		populateCache();
 		return files;
-	}
-
-	public List<String> getDirectories() {
-		//populateCache();
-		return directories;
 	}
 
 }
