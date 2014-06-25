@@ -1,0 +1,4 @@
+Host rus
+        HostName localhost
+        User pi
+        Port 6666
