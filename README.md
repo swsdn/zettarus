@@ -1,4 +1,4 @@
-zettarus - photo and video browsing app with remote webcam synchronization
+zettarus 
 ========
 
-spring boot camp
+photo and video browsing app with remote webcam synchronization
